@@ -8,6 +8,16 @@ WorkingDirectory=/opt/internet-payment-tracker
 EnvironmentFile=/opt/internet-payment-tracker/.env
 ExecStart=/opt/internet-payment-tracker/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8001 --workers 1
 Restart=always
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/opt/internet-payment-tracker/data
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+SystemCallArchitectures=native
 
 [Install]
 WantedBy=multi-user.target
