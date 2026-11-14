@@ -28,12 +28,12 @@ journalctl -u payment-tracker -n 200 --no-pager
 ## 2. Create a backup
 
 The scheduled backup script should already be installed at
-`/usr/local/sbin/backup-telegram-order-bot`. Run it manually before every
+`/usr/local/sbin/backup-payment-tracker`. Run it manually before every
 update:
 
 ```bash
-/usr/local/sbin/backup-telegram-order-bot
-ls -lh /opt/backups/telegram-order-bot/
+/usr/local/sbin/backup-payment-tracker
+ls -lh /opt/backups/payment-tracker/
 ```
 
 The script uses SQLite's `.backup` command, keeps backups for 14 days, and
@@ -97,7 +97,7 @@ verify the service:
 ```bash
 systemctl stop payment-tracker
 sudo -u paymenttracker cp \
-  /opt/backups/telegram-order-bot/orders-YYYYMMDD-HHMMSS.db \
+  /opt/backups/payment-tracker/tracker-YYYYMMDD-HHMMSS.db \
   /opt/internet-payment-tracker/data/tracker.db
 systemctl start payment-tracker
 systemctl status payment-tracker --no-pager
@@ -108,23 +108,24 @@ systemctl status payment-tracker --no-pager
 Install the repository's backup script and make it executable:
 
 ```bash
-mkdir -p /opt/backups/telegram-order-bot
-cp /opt/internet-payment-tracker/scripts/backup-telegram-order-bot \
-  /usr/local/sbin/backup-telegram-order-bot
-chmod 700 /usr/local/sbin/backup-telegram-order-bot
+mkdir -p /opt/backups/payment-tracker
+cp /opt/internet-payment-tracker/scripts/backup-payment-tracker \
+  /usr/local/sbin/backup-payment-tracker
+chown paymenttracker:paymenttracker /usr/local/sbin/backup-payment-tracker
+chmod 700 /usr/local/sbin/backup-payment-tracker
 ```
 
 Add the daily cron job with `crontab -e`:
 
 ```cron
-15 2 * * * /usr/local/sbin/backup-telegram-order-bot
+15 2 * * * /usr/local/sbin/backup-payment-tracker
 ```
 
 Test it immediately:
 
 ```bash
-/usr/local/sbin/backup-telegram-order-bot
-ls -lh /opt/backups/telegram-order-bot/
+/usr/local/sbin/backup-payment-tracker
+ls -lh /opt/backups/payment-tracker/
 ```
 
 Backups on the same server do not protect against disk loss. Periodically

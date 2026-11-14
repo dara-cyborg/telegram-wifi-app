@@ -222,7 +222,7 @@ verification, and rollback procedure. At minimum, create a database backup
 before updating:
 
 ```bash
-/usr/local/sbin/backup-telegram-order-bot
+/usr/local/sbin/backup-payment-tracker
 ```
 
 The update sequence is:
@@ -250,24 +250,25 @@ SQLite backup, keeps 14 days of local backups, and stores them outside the
 application directory:
 
 ```bash
-mkdir -p /opt/backups/telegram-order-bot
-cp /opt/internet-payment-tracker/scripts/backup-telegram-order-bot \
-  /usr/local/sbin/backup-telegram-order-bot
-chmod 700 /usr/local/sbin/backup-telegram-order-bot
+mkdir -p /opt/backups/payment-tracker
+cp /opt/internet-payment-tracker/scripts/backup-payment-tracker \
+  /usr/local/sbin/backup-payment-tracker
+chown paymenttracker:paymenttracker /usr/local/sbin/backup-payment-tracker
+chmod 700 /usr/local/sbin/backup-payment-tracker
 crontab -e
 ```
 
 Add this cron entry:
 
 ```cron
-15 2 * * * /usr/local/sbin/backup-telegram-order-bot
+15 2 * * * /usr/local/sbin/backup-payment-tracker
 ```
 
 Test the script immediately:
 
 ```bash
-/usr/local/sbin/backup-telegram-order-bot
-ls -lh /opt/backups/telegram-order-bot/
+/usr/local/sbin/backup-payment-tracker
+ls -lh /opt/backups/payment-tracker/
 ```
 
 Restore only while the service is stopped:
@@ -275,7 +276,7 @@ Restore only while the service is stopped:
 ```bash
 systemctl stop payment-tracker
 sudo -u paymenttracker cp \
-  /opt/backups/telegram-order-bot/orders-YYYYMMDD-HHMMSS.db \
+  /opt/backups/payment-tracker/tracker-YYYYMMDD-HHMMSS.db \
   /opt/internet-payment-tracker/data/tracker.db
 systemctl start payment-tracker
 ```
