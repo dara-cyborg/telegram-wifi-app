@@ -8,7 +8,7 @@ Droplet behind Caddy with HTTPS.
 Prepare:
 
 - An Ubuntu 24.04 server with a public IPv4 address
-- A DNS `A` record such as `tracker.example.com` pointing to the server
+- A DNS `A` record for `internet.daramongkol.tech` pointing to the server
 - A Telegram bot token
 - The Telegram group chat ID
 - The administrator's Telegram user ID
@@ -94,7 +94,7 @@ ADMIN_TELEGRAM_ID=987654321
 TIMEZONE=Asia/Phnom_Penh
 DATABASE_PATH=/opt/internet-payment-tracker/data/tracker.db
 DEV_MODE=false
-PORT=8000
+PORT=8001
 ```
 
 Protect the file:
@@ -125,13 +125,13 @@ Run a temporary local check:
 
 ```bash
 sudo -u paymenttracker venv/bin/uvicorn app.main:app \
-  --host 127.0.0.1 --port 8000 --workers 1
+  --host 127.0.0.1 --port 8001 --workers 1
 ```
 
 From a second SSH session:
 
 ```bash
-curl -I http://127.0.0.1:8000/
+curl -I http://127.0.0.1:8001/
 ```
 
 Stop the temporary server with `Ctrl+C`.
@@ -156,11 +156,10 @@ journalctl -u payment-tracker -f
 
 ## 7. Configure Caddy and HTTPS
 
-Replace the placeholder hostname in the Caddy configuration:
+Install the included Caddy configuration:
 
 ```bash
-sed 's/tracker.yourdomain.com/tracker.example.com/' \
-  Caddyfile > /etc/caddy/Caddyfile
+cp Caddyfile /etc/caddy/Caddyfile
 ```
 
 Validate and reload Caddy:
@@ -176,10 +175,10 @@ Caddy obtains and renews the HTTPS certificate automatically. Verify the
 public endpoint:
 
 ```bash
-curl -I https://tracker.example.com/
+curl -I https://internet.daramongkol.tech/
 ```
 
-Do not expose port `8000` publicly; Uvicorn must remain bound to
+Do not expose port `8001` publicly; Uvicorn must remain bound to
 `127.0.0.1`.
 
 ## 8. Register the Telegram Mini App
@@ -189,7 +188,7 @@ In Telegram:
 1. Open `@BotFather`.
 2. Select the bot.
 3. Open **Bot Settings** → **Menu Button**.
-4. Set the Mini App URL to `https://tracker.example.com`.
+4. Set the Mini App URL to `https://internet.daramongkol.tech`.
 5. Open the Mini App from the administrator account.
 
 The app requires a valid Telegram `initData` signature and the configured
@@ -202,7 +201,7 @@ Check all of the following:
 ```bash
 systemctl is-active payment-tracker
 systemctl is-active caddy
-curl -I https://tracker.example.com/
+curl -I https://internet.daramongkol.tech/
 ```
 
 From the Mini App:
@@ -285,4 +284,4 @@ ss -tulpn
 ```
 
 The expected public listeners are Caddy on ports `80` and `443`; Uvicorn
-should listen only on `127.0.0.1:8000`.
+should listen only on `127.0.0.1:8001`.

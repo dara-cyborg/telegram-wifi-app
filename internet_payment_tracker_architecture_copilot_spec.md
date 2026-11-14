@@ -320,7 +320,7 @@ Follow these exact steps in order when generating the codebase:
 
 1. **Provision Droplet:**
    - Ubuntu 24.04 LTS ($4 or $6/month Basic Droplet).
-   - Point a domain or subdomain (e.g., `tracker.yourdomain.com`) to the Droplet's IP via an `A` record (Telegram Mini Apps require HTTPS).
+   - Point `internet.daramongkol.tech` to the Droplet's IP via an `A` record (Telegram Mini Apps require HTTPS).
 2. **Set Server Timezone:**
    ```bash
    sudo timedatectl set-timezone Asia/Phnom_Penh
@@ -358,9 +358,9 @@ Follow these exact steps in order when generating the codebase:
    *(Note: Keep `--workers 1` so the embedded `APScheduler` runs exactly one instance and sends only one message at 6:00 AM).*
 6. **Configure Caddy (`/etc/caddy/Caddyfile`):**
    ```caddyfile
-   tracker.yourdomain.com {
+   internet.daramongkol.tech {
        reverse_proxy 127.0.0.1:8000
    }
    ```
 7. **Register Mini App with `@BotFather`:**
-   - Message `@BotFather` -> `/newapp` or `/mybots` -> Select Bot -> **Bot Settings** -> **Menu Button** -> Paste `https://tracker.yourdomain.com`.
+   - Message `@BotFather` -> `/newapp` or `/mybots` -> Select Bot -> **Bot Settings** -> **Menu Button** -> Paste `https://internet.daramongkol.tech`.

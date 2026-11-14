@@ -57,7 +57,7 @@ ADMIN_TELEGRAM_ID=1
 TIMEZONE=Asia/Phnom_Penh
 DATABASE_PATH=./data/test-tracker.db
 DEV_MODE=true
-PORT=8000
+PORT=8001
 ```
 
 `DEV_MODE=true` bypasses Telegram authentication only when the request has no
@@ -100,7 +100,7 @@ New-Item -ItemType Directory -Force data | Out-Null
 Start FastAPI:
 
 ```powershell
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --workers 1
 ```
 
 ### Linux or macOS
@@ -108,12 +108,12 @@ Start FastAPI:
 ```bash
 mkdir -p data
 .venv/bin/python -c "from app.database import initialize_database; initialize_database('./data/test-tracker.db')"
-.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1
+.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --workers 1
 ```
 
 Keep the server terminal open. Stop it with `Ctrl+C`.
 
-Open <http://127.0.0.1:8000/> in a browser. In local development, the frontend
+Open <http://127.0.0.1:8001/> in a browser. In local development, the frontend
 will load without a Telegram authorization header because `DEV_MODE=true`.
 
 ## 6. Test the API
@@ -125,7 +125,7 @@ Use a second terminal.
 PowerShell:
 
 ```powershell
-Invoke-RestMethod http://127.0.0.1:8000/api/tenants
+Invoke-RestMethod http://127.0.0.1:8001/api/tenants
 ```
 
 ### Create a tenant
@@ -141,7 +141,7 @@ $body = @{
   mac_addresses = @("AA:BB:CC:11:22:33")
 } | ConvertTo-Json
 
-Invoke-RestMethod http://127.0.0.1:8000/api/tenants `
+Invoke-RestMethod http://127.0.0.1:8001/api/tenants `
   -Method Post -ContentType "application/json" -Body $body
 ```
 
@@ -150,14 +150,14 @@ Invoke-RestMethod http://127.0.0.1:8000/api/tenants `
 ```powershell
 $body = @{ payment_date = "2026-11-14" } | ConvertTo-Json
 
-Invoke-RestMethod http://127.0.0.1:8000/api/tenants/1/pay `
+Invoke-RestMethod http://127.0.0.1:8001/api/tenants/1/pay `
   -Method Post -ContentType "application/json" -Body $body
 ```
 
 ### Delete the tenant
 
 ```powershell
-Invoke-RestMethod http://127.0.0.1:8000/api/tenants/1 `
+Invoke-RestMethod http://127.0.0.1:8001/api/tenants/1 `
   -Method Delete
 ```
 
@@ -181,7 +181,7 @@ and edit tenant records through the API commands above.
 Set `DEV_MODE=false` in `.env`, restart the server, and call:
 
 ```powershell
-Invoke-WebRequest http://127.0.0.1:8000/api/tenants -UseBasicParsing
+Invoke-WebRequest http://127.0.0.1:8001/api/tenants -UseBasicParsing
 ```
 
 The request should return HTTP `403` without a valid Telegram `initData`
@@ -243,7 +243,7 @@ If dependencies are missing, install them inside `.venv`:
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-If port `8000` is occupied, use another port and update `PORT`:
+If port `8001` is occupied, use another port and update `PORT`:
 
 ```powershell
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --workers 1

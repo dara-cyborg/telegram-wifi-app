@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     timezone: str = "Asia/Phnom_Penh"
     database_path: str = "./data/tracker.db"
     dev_mode: bool = False
-    port: int = 8000
+    port: int = 8001
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
