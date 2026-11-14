@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+backup_dir="/opt/backups/telegram-order-bot"
+database="/opt/internet-payment-tracker/data/tracker.db"
+timestamp="$(date +%Y%m%d-%H%M%S)"
+
+mkdir -p "$backup_dir"
+sqlite3 "$database" ".backup '$backup_dir/orders-$timestamp.db'"
+find "$backup_dir" -type f -name 'orders-*.db' -mtime +14 -delete

@@ -217,14 +217,15 @@ The scheduled report runs daily at `06:00` in `Asia/Phnom_Penh`.
 
 ## 10. Updates
 
-Back up the database before updating:
+Follow [UPDATE_GUIDE.md](./UPDATE_GUIDE.md) for the complete update, backup,
+verification, and rollback procedure. At minimum, create a database backup
+before updating:
 
 ```bash
-sudo -u paymenttracker sqlite3 data/tracker.db \
-  ".backup 'data/tracker-$(date +%Y%m%d-%H%M%S).db'"
+/usr/local/sbin/backup-telegram-order-bot
 ```
 
-Deploy a new version:
+The update sequence is:
 
 ```bash
 cd /opt/internet-payment-tracker
@@ -244,24 +245,43 @@ journalctl -u payment-tracker -n 200 --no-pager
 
 ## 11. Backups and recovery
 
-Keep database backups outside the server. SQLite backups should be created with
-the SQLite `.backup` command while the application is running:
+Install the included backup script before going live. It creates a consistent
+SQLite backup, keeps 14 days of local backups, and stores them outside the
+application directory:
 
 ```bash
-sudo -u paymenttracker sqlite3 data/tracker.db \
-  ".backup 'data/tracker-latest.db'"
+mkdir -p /opt/backups/telegram-order-bot
+cp /opt/internet-payment-tracker/scripts/backup-telegram-order-bot \
+  /usr/local/sbin/backup-telegram-order-bot
+chmod 700 /usr/local/sbin/backup-telegram-order-bot
+crontab -e
+```
+
+Add this cron entry:
+
+```cron
+15 2 * * * /usr/local/sbin/backup-telegram-order-bot
+```
+
+Test the script immediately:
+
+```bash
+/usr/local/sbin/backup-telegram-order-bot
+ls -lh /opt/backups/telegram-order-bot/
 ```
 
 Restore only while the service is stopped:
 
 ```bash
 systemctl stop payment-tracker
-sudo -u paymenttracker cp data/tracker-latest.db data/tracker.db
+sudo -u paymenttracker cp \
+  /opt/backups/telegram-order-bot/orders-YYYYMMDD-HHMMSS.db \
+  /opt/internet-payment-tracker/data/tracker.db
 systemctl start payment-tracker
 ```
 
-Confirm the service is healthy and verify tenant data through the Mini App
-after a restore.
+Keep an additional copy of backups outside the server. Confirm the service is
+healthy and verify tenant data through the Mini App after a restore.
 
 ## 12. Common operations
 
