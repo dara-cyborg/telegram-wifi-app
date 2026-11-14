@@ -8,7 +8,7 @@ SCHEMA = """
 PRAGMA foreign_keys = ON;
 PRAGMA journal_mode = WAL;
 CREATE TABLE IF NOT EXISTS tenants (
- id INTEGER PRIMARY KEY AUTOINCREMENT, room_number TEXT NOT NULL UNIQUE,
+ id INTEGER PRIMARY KEY AUTOINCREMENT, room_number TEXT NOT NULL,
  ssid TEXT NOT NULL, due_day INTEGER NOT NULL CHECK(due_day BETWEEN 1 AND 31),
  last_payment_date TEXT NOT NULL, last_paid_for_due_date TEXT NOT NULL,
  late_days_remark INTEGER NOT NULL DEFAULT 0, is_active INTEGER NOT NULL DEFAULT 1,
@@ -32,6 +32,37 @@ def initialize_database(path: str) -> None:
     database.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(database) as connection:
         connection.executescript(SCHEMA)
+        table_sql = connection.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='tenants'"
+        ).fetchone()[0]
+        if "ROOM_NUMBER TEXT NOT NULL UNIQUE" in table_sql.upper():
+            connection.execute("PRAGMA foreign_keys = OFF")
+            connection.execute("BEGIN")
+            try:
+                connection.execute("""CREATE TABLE tenants_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    room_number TEXT NOT NULL,
+                    ssid TEXT NOT NULL,
+                    due_day INTEGER NOT NULL CHECK(due_day BETWEEN 1 AND 31),
+                    last_payment_date TEXT NOT NULL,
+                    last_paid_for_due_date TEXT NOT NULL,
+                    late_days_remark INTEGER NOT NULL DEFAULT 0,
+                    is_active INTEGER NOT NULL DEFAULT 1,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                )""")
+                connection.execute("INSERT INTO tenants_new SELECT * FROM tenants")
+                connection.execute("DROP TABLE tenants")
+                connection.execute("ALTER TABLE tenants_new RENAME TO tenants")
+                connection.commit()
+            except Exception:
+                connection.rollback()
+                raise
+            finally:
+                connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_tenants_room_number ON tenants(room_number)"
+        )
 
 
 @contextmanager

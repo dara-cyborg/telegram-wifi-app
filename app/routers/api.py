@@ -2,6 +2,7 @@ from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlite3 import IntegrityError
 
 from app.auth import verify_admin
 from app.config import get_settings
@@ -25,12 +26,18 @@ async def get_tenants(_: dict = Depends(verify_admin)):
 
 @router.post("/tenants")
 async def add_tenant(data: TenantInput, _: dict = Depends(verify_admin)):
-    return create_tenant(database_path(), data)
+    try:
+        return create_tenant(database_path(), data)
+    except IntegrityError as error:
+        raise HTTPException(409, "Room number or MAC address already exists") from error
 
 
 @router.put("/tenants/{tenant_id}")
 async def edit_tenant(tenant_id: int, data: TenantInput, _: dict = Depends(verify_admin)):
-    result = update_tenant(database_path(), tenant_id, data)
+    try:
+        result = update_tenant(database_path(), tenant_id, data)
+    except IntegrityError as error:
+        raise HTTPException(409, "Room number or MAC address already exists") from error
     if result is None:
         raise HTTPException(404, "Tenant not found")
     return result

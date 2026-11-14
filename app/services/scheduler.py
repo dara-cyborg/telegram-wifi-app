@@ -22,7 +22,16 @@ def build_tenant_views(tenants: list[dict], today):
         next_due = add_one_month(due, tenant["due_day"])
         tenant["next_due_date"] = next_due.isoformat()
         tenant["status"] = classify_status(today, next_due)
-    return tenants
+        tenant["days_until_due"] = (next_due - today).days
+    priority = {"OVERDUE": 0, "DUE_SOON": 1, "PAID": 2}
+    return sorted(
+        tenants,
+        key=lambda tenant: (
+            priority[tenant["status"]],
+            tenant["days_until_due"] if tenant["status"] != "PAID" else 0,
+            tenant["room_number"].casefold(),
+        ),
+    )
 
 
 def configure_scheduler(scheduler, database_path: str) -> None:

@@ -16,17 +16,17 @@ def _row(connection, tenant_id: int):
     if row is None:
         return None
     result = dict(row)
-    result["mac_addresses"] = [
-        item["mac_address"] for item in connection.execute(
-            "SELECT mac_address FROM devices WHERE tenant_id = ? ORDER BY id", (tenant_id,)
-        ).fetchall()
-    ]
+    result["devices"] = [dict(item) for item in connection.execute(
+        "SELECT id, mac_address, device_label FROM devices WHERE tenant_id = ? ORDER BY id",
+        (tenant_id,),
+    ).fetchall()]
+    result["mac_addresses"] = [item["mac_address"] for item in result["devices"]]
     return result
 
 
 def list_tenants(path: str) -> list[dict]:
     with get_connection(path) as connection:
-        ids = connection.execute("SELECT id FROM tenants WHERE is_active = 1 ORDER BY room_number").fetchall()
+        ids = connection.execute("SELECT id FROM tenants WHERE is_active = 1").fetchall()
         return [_row(connection, item["id"]) for item in ids]
 
 
@@ -94,6 +94,5 @@ def record_payment(path: str, tenant_id: int, payment_date) -> dict | None:
 
 def delete_tenant(path: str, tenant_id: int) -> bool:
     with get_connection(path) as connection:
-        result = connection.execute("UPDATE tenants SET is_active=0, updated_at=? WHERE id=? AND is_active=1",
-                                    (_now(), tenant_id))
+        result = connection.execute("DELETE FROM tenants WHERE id=? AND is_active=1", (tenant_id,))
         return result.rowcount == 1

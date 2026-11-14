@@ -1,17 +1,17 @@
+import re
 from datetime import date
 from pydantic import BaseModel, Field, field_validator
 
 
 def normalize_mac(value: str) -> str:
-    compact = value.replace("-", ":").upper()
-    parts = compact.split(":")
-    if len(parts) != 6 or any(len(part) != 2 for part in parts):
-        raise ValueError("Invalid MAC address")
-    try:
-        int("".join(parts), 16)
-    except ValueError as error:
-        raise ValueError("Invalid MAC address") from error
-    return ":".join(parts)
+    hex_only = re.sub(r"[^0-9A-Fa-f]", "", value)
+    if len(hex_only) != 12:
+        raise ValueError(
+            f"Invalid MAC address '{value}': must contain exactly 12 hex characters."
+        )
+    return ":".join(
+        hex_only.upper()[index:index + 2] for index in range(0, 12, 2)
+    )
 
 
 class TenantInput(BaseModel):
@@ -19,12 +19,12 @@ class TenantInput(BaseModel):
     ssid: str = Field(min_length=1)
     due_day: int = Field(ge=1, le=31)
     last_payment_date: date
-    mac_addresses: list[str] = Field(min_length=1)
+    mac_addresses: list[str] = Field(default_factory=list)
 
     @field_validator("mac_addresses")
     @classmethod
     def validate_macs(cls, values: list[str]) -> list[str]:
-        normalized = [normalize_mac(value) for value in values]
+        normalized = [normalize_mac(value.strip()) for value in values if value.strip()]
         if len(set(normalized)) != len(normalized):
             raise ValueError("Duplicate MAC addresses")
         return normalized
