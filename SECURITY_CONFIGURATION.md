@@ -177,7 +177,7 @@ systemctl status payment-tracker --no-pager
 The service account must own the data directory:
 
 ```bash
-chown -R www-data:www-data /opt/internet-payment-tracker/data
+chown -R paymenttracker:paymenttracker /opt/internet-payment-tracker/data
 chmod 700 /opt/internet-payment-tracker/data
 chmod 600 /opt/internet-payment-tracker/.env
 ```

@@ -3,7 +3,7 @@ Description=Telegram Mini App Internet Payment Tracker
 After=network.target
 
 [Service]
-User=www-data
+User=paymenttracker
 WorkingDirectory=/opt/internet-payment-tracker
 EnvironmentFile=/opt/internet-payment-tracker/.env
 ExecStart=/opt/internet-payment-tracker/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8001 --workers 1
